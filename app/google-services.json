@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "85922520658",
+    "firebase_url": "https://y-atak-f8ae9-default-rtdb.firebaseio.com",
+    "project_id": "y-atak-f8ae9",
+    "storage_bucket": "y-atak-f8ae9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:85922520658:android:1342b489a88bbd87ae898b",
+        "android_client_info": {
+          "package_name": "com.anubhav.y_atak"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "85922520658-hopl0vtgqijrhrptsbh77itntbpgg82i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anubhav.y_atak",
+            "certificate_hash": "dc3abef8a96bfb1ac5d84fe7e76e42a3bac751fb"
+          }
+        },
+        {
+          "client_id": "85922520658-qldrcvu0b71evv7abevau514io8uej6h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIaFN1vtAOZxRF8dyvmOzDo2SNa3-yxuM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "85922520658-qldrcvu0b71evv7abevau514io8uej6h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
