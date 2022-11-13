@@ -83,7 +83,12 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
     }
     private fun String.sha256(): String {
         val md = MessageDigest.getInstance("SHA-256")
-        return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+        val b = BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+        var fb = ""
+        for(i in 0 until 64-b.length){
+            fb += "0"
+        }
+        return fb+b
     }
     override fun getItemCount(): Int {
         return differ.currentList.size

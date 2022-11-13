@@ -43,8 +43,6 @@ class Encryptor {
 
         val aesKey: SecretKey = SecretKeySpec(byteK, 0, byteK.size, "AES")
         val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
-//        val noteIVByte = noteIV.toByteArray()
-//        val noteIVByte = noteIV.map { it.toByte() }.toByteArray()
         noteIVfinal = noteIV
         val ivSpec = IvParameterSpec(getSavedInitializationVector(context))
         cipher.init(Cipher.DECRYPT_MODE, aesKey, ivSpec)
@@ -55,16 +53,6 @@ class Encryptor {
             sb.append(b.toChar())
         }
         return sb.toString()
-    }
-
-
-    fun getSavedSecretKey(context: Context): SecretKey {
-        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
-        val strSecretKey = sharedPref.getString("secret_key", "")
-        Log.d("dbg", "strSecretKey = [$strSecretKey]")
-        val bytes = android.util.Base64.decode(strSecretKey, android.util.Base64.DEFAULT)
-        val ois = ObjectInputStream(ByteArrayInputStream(bytes))
-        return ois.readObject() as SecretKey
     }
 
     fun saveInitializationVector(context: Context, initializationVector: ByteArray) : String {

@@ -2,15 +2,21 @@ package com.anubhav.yatak.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.anubhav.yatak.*
 import com.anubhav.yatak.databinding.FragmentUpdateNoteBinding
 import com.anubhav.yatak.model.Note
 import com.anubhav.yatak.helper.toast
 import com.anubhav.yatak.viewmodel.NoteViewModel
+import java.lang.Exception
+import java.math.BigInteger
+import java.security.MessageDigest
 
 
 class UpdateNoteFragment : Fragment(R.layout.fragment_update_note) {
@@ -49,17 +55,38 @@ class UpdateNoteFragment : Fragment(R.layout.fragment_update_note) {
         currentNote = args.note!!
 
         val encryptor = Encryptor()
-
+        val tdes = TrippleDe()
+        var message : String = ""
         val blowfishKnowledgeFactory = BlowfishKnowledgeFactory()
 
         val key = Util.password
+        try{
+            val dedeString = tdes._decrypt(currentNote.noteBody!!, key)
 
-        val decryptFirst = blowfishKnowledgeFactory.decrypt(currentNote.noteBody, key)
+            Log.d("TAG", "onViewCreated: $dedeString")
 
-        val dataToDecrypt = decryptFirst.map { it.toByte() }.toByteArray()
+            val decryptFirst = blowfishKnowledgeFactory.decrypt(dedeString, key)
 
-        val decryptedString = encryptor.decrypt(requireContext(), dataToDecrypt, key.toString(), currentNote.noteIV)
-        binding.etNoteBodyUpdate.setText(decryptedString)
+            val dataToDecrypt = decryptFirst.map { it.toByte() }.toByteArray()
+
+            val decryptedString = encryptor.decrypt(requireContext(), dataToDecrypt, key.toString(), currentNote.noteIV)
+
+            val hash = decryptedString.takeLast(64)
+
+            message = decryptedString.take(decryptedString.length - 64)
+            if(message.sha256() != hash){
+                Toast.makeText(requireContext(), "ALERT!! YOUR DATA HAS BEEN TAMPERED WITH", Toast.LENGTH_SHORT).show()
+            }else{
+                Toast.makeText(requireContext(), "YOUR DATA IS SAFE", Toast.LENGTH_SHORT).show()
+            }
+
+        }catch (e : Exception){
+            Toast.makeText(requireContext(), "ALERT!! YOUR DATA HAS BEEN TAMPERED WITH", Toast.LENGTH_SHORT).show()
+            view.findNavController()
+                .navigate(R.id.action_updateNoteFragment_to_homeFragment)
+        }
+
+        binding.etNoteBodyUpdate.setText(message)
         binding.etNoteTitleUpdate.setText(currentNote.noteTitle)
 
         binding.fabDone.setOnClickListener {
@@ -68,9 +95,11 @@ class UpdateNoteFragment : Fragment(R.layout.fragment_update_note) {
 
                 if (title.isNotEmpty()) {
                     if (binding.etNoteBodyUpdate.toString() != currentNote.noteBody) {
+
+                        val data = binding.etNoteBodyUpdate.text.trim().toString() + binding.etNoteBodyUpdate.text.trim().toString().sha256()
                         val newEncryptNote = encryptor.encrypt(
                             requireContext(),
-                            binding.etNoteBodyUpdate.text.toString(),
+                            data,
                             key
                         )
 
@@ -78,7 +107,9 @@ class UpdateNoteFragment : Fragment(R.layout.fragment_update_note) {
 
                         val finalEncrypt = blowfishKnowledgeFactory.encrypt(newEncryptNote.noteBody, key)
 
-                        val note = Note(currentNote.id, binding.etNoteTitleUpdate.text.toString(), finalEncrypt, newEncryptNote.noteIV)
+                        val finalfinalEncrypt = tdes._encrypt(finalEncrypt, key)
+
+                        val note = Note(currentNote.id, binding.etNoteTitleUpdate.text.toString(), finalfinalEncrypt, newEncryptNote.noteIV)
                         noteViewModel.updateNote(note)
                     }else{
                         val note = Note(currentNote.id,binding.etNoteTitleUpdate.text.toString(), binding.etNoteBodyUpdate.text.toString(), currentNote.noteIV)
@@ -124,6 +155,16 @@ class UpdateNoteFragment : Fragment(R.layout.fragment_update_note) {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun String.sha256(): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        val b = BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+        var fb = ""
+        for(i in 0 until 64-b.length){
+            fb += "0"
+        }
+        return fb+b
     }
 
 
