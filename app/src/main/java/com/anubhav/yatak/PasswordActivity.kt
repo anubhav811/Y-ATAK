@@ -3,6 +3,7 @@ package com.anubhav.yatak
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -45,7 +46,7 @@ class PasswordActivity : AppCompatActivity() {
                 } else if (pw != confirmPw) {
                     Snackbar.make(binding.root, "Passwords do not match", Snackbar.LENGTH_SHORT)
                         .show()
-                } else {
+                }else{
                     GlobalScope.launch(Dispatchers.IO) {
                         noteRepository.setPassword(pw)
                     }
@@ -57,7 +58,9 @@ class PasswordActivity : AppCompatActivity() {
         } else {
             binding.confirmButton.setOnClickListener {
                 val pw = binding.etPw.text.toString().sha256()
-                if (pw == password) {
+                val confpw = binding.etPw2.text.toString().sha256()
+                Log.d("Key1", "onCreate: ${pw + " " + pw.length}")
+                if (pw == password && confpw == password) {
                     val intent = Intent(this, MainActivity::class.java)
                     startActivity(intent)
                     finish()
@@ -68,7 +71,12 @@ class PasswordActivity : AppCompatActivity() {
 
     private fun String.sha256(): String {
         val md = MessageDigest.getInstance("SHA-256")
-        return BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+        val b = BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+        var fb = ""
+        for(i in 0 until 64-b.length){
+            fb += "0"
+        }
+        return fb+b
     }
 
     private fun setUpViewModel() {

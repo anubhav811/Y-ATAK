@@ -17,6 +17,8 @@ import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.math.BigInteger
+import java.security.MessageDigest
 
 
 class NewNoteFragment : Fragment(R.layout.fragment_new_note) {
@@ -62,17 +64,24 @@ class NewNoteFragment : Fragment(R.layout.fragment_new_note) {
             Log.d("Key",key)
 
             val encryptor = Encryptor()
+            val tdes = TrippleDe()
 
-            val noteData = encryptor.encrypt(requireContext(),binding.etNoteBody.text.trim().toString(), key)
+            val data = binding.etNoteBody.text.trim().toString() + binding.etNoteBody.text.trim().toString().sha256()
+
+            Log.d("Key", "saveNote: ${data + data.sha256() + " " + (data +  data.sha256()).length}")
+
+            val noteData = encryptor.encrypt(requireContext(),data, key)
 
             val blowfishKnowledgeFactory = BlowfishKnowledgeFactory()
 
             val finalEncrypt = blowfishKnowledgeFactory.encrypt(noteData.noteBody, key)
 
-            Log.d("TAG", "encrypted: ${noteData.noteBody}")
+            val finalfinalEncrypt = tdes._encrypt(finalEncrypt, key)
+
+            Log.d("TAG", "encrypted: $finalEncrypt")
 
             val noteId = FirebaseDatabase.getInstance().getReference("notes").push().key.toString()
-            val note = Note(noteId,noteTitle, finalEncrypt, noteData.noteIV)
+            val note = Note(noteId,noteTitle, finalfinalEncrypt, noteData.noteIV)
 
             noteViewModel.addNote(note)
             Snackbar.make(
@@ -101,6 +110,16 @@ class NewNoteFragment : Fragment(R.layout.fragment_new_note) {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun String.sha256(): String {
+        val md = MessageDigest.getInstance("SHA-256")
+        val b = BigInteger(1, md.digest(toByteArray())).toString(16).padStart(32, '0')
+        var fb = ""
+        for(i in 0 until 64-b.length){
+            fb += "0"
+        }
+        return fb+b
     }
 
 
