@@ -70,12 +70,16 @@ class NewNoteFragment : Fragment(R.layout.fragment_new_note) {
 
             Log.d("Key", "saveNote: ${data + data.sha256() + " " + (data +  data.sha256()).length}")
 
+            // AES
             val noteData = encryptor.encrypt(requireContext(),data, key)
+
 
             val blowfishKnowledgeFactory = BlowfishKnowledgeFactory()
 
+            // BlowFish
             val finalEncrypt = blowfishKnowledgeFactory.encrypt(noteData.noteBody, key)
 
+            //3DES
             val finalfinalEncrypt = tdes._encrypt(finalEncrypt, key)
 
             Log.d("TAG", "encrypted: $finalEncrypt")

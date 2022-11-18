@@ -71,6 +71,7 @@ class UpdateNoteFragment : Fragment(R.layout.fragment_update_note) {
 
             val decryptedString = encryptor.decrypt(requireContext(), dataToDecrypt, key.toString(), currentNote.noteIV)
 
+            // message+message ka hash
             val hash = decryptedString.takeLast(64)
 
             message = decryptedString.take(decryptedString.length - 64)

@@ -75,7 +75,6 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
                 } else {
                     Toast.makeText(it.context, "Wrong Password", Toast.LENGTH_SHORT).show()
                 }
-
             }
             builder.setCancelable(true)
             builder.show()
